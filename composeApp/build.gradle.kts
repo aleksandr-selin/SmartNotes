@@ -50,6 +50,7 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.runtime)
+            implementation(libs.coroutines.extensions)
             implementation(libs.koin.core)
         }
         iosMain.dependencies {
@@ -86,6 +87,14 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+sqldelight {
+    databases {
+        create("NotesDatabase") {
+            packageName.set("ru.selin.smartnotes.database")
+        }
     }
 }
 

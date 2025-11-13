@@ -1,0 +1,72 @@
+-- ========================================
+-- ТАБЛИЦА: SUBTASK (Подзадачи)
+-- ========================================
+-- Описание: Таблица для хранения подзадач (шагов) внутри задач
+--           Связана с Task через Foreign Key с каскадным удалением
+-- Data Layer: Local Storage
+-- ========================================
+
+CREATE TABLE subtask (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    taskId INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    isDone INTEGER NOT NULL DEFAULT 0, -- 0 = false, 1 = true
+    FOREIGN KEY (taskId) REFERENCES task(id) ON DELETE CASCADE
+);
+
+-- Индекс для быстрого получения подзадач по taskId
+CREATE INDEX subtask_taskId_idx ON subtask(taskId);
+
+-- ========================================
+-- CRUD ОПЕРАЦИИ: SUBTASK
+-- ========================================
+
+-- Вставка новой подзадачи
+insertSubtask:
+INSERT INTO subtask(taskId, title, isDone)
+VALUES (?, ?, ?);
+
+-- Обновление подзадачи
+updateSubtask:
+UPDATE subtask
+SET title = ?, isDone = ?
+WHERE id = ?;
+
+-- Обновление статуса выполнения подзадачи
+toggleSubtaskStatus:
+UPDATE subtask SET isDone = ? WHERE id = ?;
+
+-- Удаление подзадачи
+deleteSubtask:
+DELETE FROM subtask WHERE id = ?;
+
+-- Получение подзадачи по ID
+getSubtaskById:
+SELECT * FROM subtask WHERE id = ?;
+
+-- Получение всех подзадач для конкретной задачи
+getSubtasksByTaskId:
+SELECT * FROM subtask WHERE taskId = ? ORDER BY id ASC;
+
+-- Получение количества выполненных подзадач для задачи
+getCompletedSubtasksCount:
+SELECT COUNT(*) FROM subtask WHERE taskId = ? AND isDone = 1;
+
+-- Получение общего количества подзадач для задачи
+getTotalSubtasksCount:
+SELECT COUNT(*) FROM subtask WHERE taskId = ?;
+
+-- Проверка, все ли подзадачи выполнены
+areAllSubtasksCompleted:
+SELECT COUNT(*) = 0 AS allCompleted
+FROM subtask
+WHERE taskId = ? AND isDone = 0;
+
+-- Удаление всех подзадач для конкретной задачи (обычно не нужно из-за CASCADE)
+deleteSubtasksByTaskId:
+DELETE FROM subtask WHERE taskId = ?;
+
+-- Получение последней вставленной подзадачи
+getLastInsertedSubtask:
+SELECT * FROM subtask WHERE id = last_insert_rowid();
+

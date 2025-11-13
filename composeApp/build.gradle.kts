@@ -57,8 +57,18 @@ kotlin {
             implementation(libs.ktor.client.darwin)
             implementation(libs.native.driver)
         }
+        // Общие тесты - работают на ВСЕХ платформах
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.turbine)
+        }
+        // Android-специфичные тесты (интеграционные с БД) - только для Android
+        androidUnitTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.sqldelight.driver.sqlite)
+            implementation(libs.turbine)
         }
     }
 }

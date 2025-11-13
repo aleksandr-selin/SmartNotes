@@ -1,0 +1,60 @@
+-- ========================================
+-- ТАБЛИЦА: NOTE (Заметки)
+-- ========================================
+-- Описание: Таблица для хранения текстовых заметок
+-- Data Layer: Local Storage
+-- ========================================
+
+CREATE TABLE note (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER NOT NULL
+);
+
+-- Индексы для оптимизации поиска и сортировки
+CREATE INDEX note_createdAt_idx ON note(createdAt);
+CREATE INDEX note_updatedAt_idx ON note(updatedAt);
+
+-- ========================================
+-- CRUD ОПЕРАЦИИ: NOTE
+-- ========================================
+
+-- Вставка новой заметки
+insertNote:
+INSERT INTO note(title, content, createdAt, updatedAt)
+VALUES (?, ?, ?, ?);
+
+-- Обновление заметки
+updateNote:
+UPDATE note
+SET title = ?, content = ?, updatedAt = ?
+WHERE id = ?;
+
+-- Удаление заметки
+deleteNote:
+DELETE FROM note WHERE id = ?;
+
+-- Получение заметки по ID
+getNoteById:
+SELECT * FROM note WHERE id = ?;
+
+-- Получение всех заметок (сортировка по дате обновления, новые сверху)
+getAllNotes:
+SELECT * FROM note ORDER BY updatedAt DESC;
+
+-- Получение всех заметок с сортировкой по дате создания
+getAllNotesByCreatedAt:
+SELECT * FROM note ORDER BY createdAt DESC;
+
+-- Поиск заметок по названию или содержимому
+searchNotes:
+SELECT * FROM note
+WHERE title LIKE '%' || ? || '%' OR content LIKE '%' || ? || '%'
+ORDER BY updatedAt DESC;
+
+-- Получение последней вставленной заметки (для возврата ID)
+getLastInsertedNote:
+SELECT * FROM note WHERE id = last_insert_rowid();
+

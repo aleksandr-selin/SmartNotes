@@ -1,0 +1,81 @@
+-- ========================================
+-- ТАБЛИЦА: TASK (Задачи)
+-- ========================================
+-- Описание: Таблица для хранения задач с логикой выполнения,
+--           важностью и связью с подзадачами
+-- Data Layer: Local Storage
+-- ========================================
+
+CREATE TABLE task (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    importance TEXT NOT NULL, -- LOW, MEDIUM, HIGH
+    isToday INTEGER NOT NULL DEFAULT 0, -- 0 = false, 1 = true
+    isCompleted INTEGER NOT NULL DEFAULT 0, -- 0 = false, 1 = true
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER NOT NULL
+);
+
+-- Индексы для фильтрации и сортировки
+CREATE INDEX task_isToday_idx ON task(isToday);
+CREATE INDEX task_isCompleted_idx ON task(isCompleted);
+CREATE INDEX task_updatedAt_idx ON task(updatedAt);
+
+-- ========================================
+-- CRUD ОПЕРАЦИИ: TASK
+-- ========================================
+
+-- Вставка новой задачи
+insertTask:
+INSERT INTO task(title, description, importance, isToday, isCompleted, createdAt, updatedAt)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+-- Обновление задачи
+updateTask:
+UPDATE task
+SET title = ?, description = ?, importance = ?, isToday = ?, isCompleted = ?, updatedAt = ?
+WHERE id = ?;
+
+-- Обновление только времени обновления (для случаев изменения подзадач)
+updateTaskTimestamp:
+UPDATE task SET updatedAt = ? WHERE id = ?;
+
+-- Обновление статуса завершенности
+updateTaskCompletionStatus:
+UPDATE task SET isCompleted = ?, updatedAt = ? WHERE id = ?;
+
+-- Удаление задачи (подзадачи удалятся автоматически через CASCADE)
+deleteTask:
+DELETE FROM task WHERE id = ?;
+
+-- Получение задачи по ID
+getTaskById:
+SELECT * FROM task WHERE id = ?;
+
+-- Получение всех задач (сортировка по дате обновления)
+getAllTasks:
+SELECT * FROM task ORDER BY updatedAt DESC;
+
+-- Получение задач "на сегодня"
+getTasksForToday:
+SELECT * FROM task WHERE isToday = 1 ORDER BY updatedAt DESC;
+
+-- Получение завершенных задач
+getCompletedTasks:
+SELECT * FROM task WHERE isCompleted = 1 ORDER BY updatedAt DESC;
+
+-- Получение незавершенных задач
+getActiveTasks:
+SELECT * FROM task WHERE isCompleted = 0 ORDER BY updatedAt DESC;
+
+-- Поиск задач по названию или описанию
+searchTasks:
+SELECT * FROM task
+WHERE title LIKE '%' || ? || '%' OR description LIKE '%' || ? || '%'
+ORDER BY updatedAt DESC;
+
+-- Получение последней вставленной задачи
+getLastInsertedTask:
+SELECT * FROM task WHERE id = last_insert_rowid();
+

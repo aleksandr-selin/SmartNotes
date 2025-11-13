@@ -22,6 +22,13 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            // Экспортируем Koin для доступа из Swift
+            export(libs.koin.core)
+        }
+        
+        // Линковка SQLite для ВСЕХ iOS бинарников (фреймворк, тесты, etc)
+        iosTarget.binaries.all {
+            linkerOpts("-lsqlite3")
         }
     }
 
@@ -34,6 +41,8 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.android)
             implementation(libs.android.driver)
+            implementation(libs.koin.android)
+            implementation(libs.koin.androidx.compose)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -52,10 +61,13 @@ kotlin {
             implementation(libs.runtime)
             implementation(libs.coroutines.extensions)
             implementation(libs.koin.core)
+            implementation(libs.koin.compose)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
             implementation(libs.native.driver)
+            // api() для экспорта в фреймворк
+            api(libs.koin.core)
         }
         // Общие тесты - работают на ВСЕХ платформах
         commonTest.dependencies {

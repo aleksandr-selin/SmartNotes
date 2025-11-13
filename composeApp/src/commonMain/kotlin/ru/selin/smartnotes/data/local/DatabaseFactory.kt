@@ -3,23 +3,18 @@ package ru.selin.smartnotes.data.local
 import ru.selin.smartnotes.database.NotesDatabase
 
 /**
- * DatabaseFactory - фабрика для создания экземпляра NotesDatabase
+ * Создаёт экземпляр NotesDatabase с использованием предоставленного драйвера
  * 
- * Инкапсулирует логику создания базы данных через платформозависимый драйвер
+ * Инкапсулирует логику создания базы данных через платформозависимый драйвер.
+ * Используется в Koin DI для создания singleton экземпляра базы данных.
+ * 
+ * @param driverFactory Фабрика для создания SqlDriver (платформозависимая)
+ * @return Экземпляр NotesDatabase готовый к использованию
  * 
  * Data Layer: Local Storage
  */
-object DatabaseFactory {
-    
-    /**
-     * Создаёт экземпляр NotesDatabase с использованием предоставленного драйвера
-     * 
-     * @param driverFactory Фабрика для создания SqlDriver (платформозависимая)
-     * @return Экземпляр NotesDatabase готовый к использованию
-     */
-    fun createDatabase(driverFactory: DatabaseDriverFactory): NotesDatabase {
-        val driver = driverFactory.createDriver()
-        return NotesDatabase(driver)
-    }
+fun createDatabase(driverFactory: DatabaseDriverFactory): NotesDatabase {
+    val driver = driverFactory.createDriver()
+    return NotesDatabase(driver)
 }
 

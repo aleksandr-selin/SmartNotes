@@ -69,6 +69,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.sqldelight.driver.sqlite)
             implementation(libs.turbine)
+            implementation(libs.mockk)
         }
     }
 }

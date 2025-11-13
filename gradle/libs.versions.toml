@@ -46,6 +46,7 @@ coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", 
 sqldelight-driver-sqlite = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqlDelight" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutinesVersion" }
 turbine = { module = "app.cash.turbine:turbine", version = "1.1.0" }
+mockk = { module = "io.mockk:mockk", version = "1.13.12" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3", version.ref="material3" }
 
 [plugins]

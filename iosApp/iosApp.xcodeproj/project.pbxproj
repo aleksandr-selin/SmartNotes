@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6AE0FF3C2EC640B20074E48E /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6AE0FF3B2EC640B20074E48E /* libsqlite3.tbd */; };
+		6A0CAA4B2EC7736200357390 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A0CAA4A2EC7733700357390 /* libsqlite3.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		65E10D3475C860FBCEA21230 /* .app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = .app; sourceTree = BUILT_PRODUCTS_DIR; };
-		6AE0FF3B2EC640B20074E48E /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		65E10D3475C860FBCEA21230 /* SmartNotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmartNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A0CAA4A2EC7733700357390 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -26,6 +26,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		828C7B7D379EEEBC26C732F7 /* Configuration */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Configuration;
+			sourceTree = "<group>";
+		};
 		B7796E7B48A89F4613735714 /* iosApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -41,7 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6AE0FF3C2EC640B20074E48E /* libsqlite3.tbd in Frameworks */,
+				6A0CAA4B2EC7736200357390 /* libsqlite3.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -51,8 +56,9 @@
 		5C3E0D24062FC48BF7CA9039 = {
 			isa = PBXGroup;
 			children = (
+				828C7B7D379EEEBC26C732F7 /* Configuration */,
 				B7796E7B48A89F4613735714 /* iosApp */,
-				6AE0FF3A2EC640B20074E48E /* Frameworks */,
+				6A0CAA492EC7733700357390 /* Frameworks */,
 				61377FAAC3D81CAD78B8C286 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -60,15 +66,15 @@
 		61377FAAC3D81CAD78B8C286 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				65E10D3475C860FBCEA21230 /* .app */,
+				65E10D3475C860FBCEA21230 /* SmartNotes.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		6AE0FF3A2EC640B20074E48E /* Frameworks */ = {
+		6A0CAA492EC7733700357390 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				6AE0FF3B2EC640B20074E48E /* libsqlite3.tbd */,
+				6A0CAA4A2EC7733700357390 /* libsqlite3.tbd */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -96,7 +102,7 @@
 			packageProductDependencies = (
 			);
 			productName = iosApp;
-			productReference = 65E10D3475C860FBCEA21230 /* .app */;
+			productReference = 65E10D3475C860FBCEA21230 /* SmartNotes.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -198,12 +204,6 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-lsqlite3",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "ru.selin.smartnotes";
-				PRODUCT_NAME = SmartNotes;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -232,12 +232,6 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-lsqlite3",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "ru.selin.smartnotes";
-				PRODUCT_NAME = SmartNotes;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -246,6 +240,8 @@
 		};
 		6C372FC4316C673FEF5177D4 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 828C7B7D379EEEBC26C732F7 /* Configuration */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -302,6 +298,8 @@
 		};
 		E9146821A20E332155B4898D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 828C7B7D379EEEBC26C732F7 /* Configuration */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;

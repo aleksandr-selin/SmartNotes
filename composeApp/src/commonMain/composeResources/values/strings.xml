@@ -1,0 +1,62 @@
+<resources>
+    <!-- App -->
+    <string name="app_name">SmartNotes</string>
+    
+    <!-- Common -->
+    <string name="back">Назад</string>
+    <string name="save">Сохранить</string>
+    <string name="add">Добавить</string>
+    <string name="delete">Удалить</string>
+    <string name="cancel">Отмена</string>
+    <string name="retry">Повторить</string>
+    <string name="error">Ошибка</string>
+    <string name="error_format">Ошибка: %s</string>
+    <string name="error_update">Ошибка обновления</string>
+    <string name="error_delete">Ошибка удаления</string>
+    <string name="error_complete">Ошибка завершения</string>
+    
+    <!-- Tabs -->
+    <string name="tab_notes">Заметки</string>
+    <string name="tab_tasks">Задачи</string>
+    
+    <!-- Notes -->
+    <string name="notes_title">Заметки</string>
+    <string name="notes_empty">Нет заметок</string>
+    <string name="note_add">Добавить заметку</string>
+    <string name="note_title_hint">Заголовок</string>
+    <string name="note_content_hint">Содержание</string>
+    <string name="note_new">Новая заметка</string>
+    <string name="note_edit">Редактирование</string>
+    
+    <!-- Tasks -->
+    <string name="tasks_title">Задачи</string>
+    <string name="tasks_empty">Нет задач</string>
+    <string name="tasks_empty_today">Нет задач на сегодня</string>
+    <string name="tasks_empty_active">Нет активных задач</string>
+    <string name="tasks_empty_completed">Нет завершённых задач</string>
+    <string name="task_add">Добавить задачу</string>
+    <string name="task_title_hint">Заголовок</string>
+    <string name="task_description_hint">Описание</string>
+    <string name="task_new">Новая задача</string>
+    <string name="task_edit">Редактирование</string>
+    <string name="task_do_today">Сделать сегодня</string>
+    
+    <!-- Filters -->
+    <string name="filter_all">Все</string>
+    <string name="filter_today">Сегодня</string>
+    <string name="filter_active">Активные</string>
+    <string name="filter_completed">Завершённые</string>
+    
+    <!-- Importance -->
+    <string name="importance_label">Важность</string>
+    <string name="importance_low">Низкая</string>
+    <string name="importance_medium">Средняя</string>
+    <string name="importance_high">Высокая</string>
+    
+    <!-- Subtasks -->
+    <string name="subtasks_label">Подзадачи</string>
+    <string name="subtask_add">Добавить подзадачу</string>
+    <string name="subtask_new">Новая подзадача</string>
+    <string name="subtask_name_hint">Название</string>
+    <string name="subtasks_count_format">%d/%d подзадач</string>
+</resources>

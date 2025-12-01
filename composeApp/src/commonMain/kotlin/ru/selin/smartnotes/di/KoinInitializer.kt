@@ -18,7 +18,8 @@ fun initKoin(
     modules(
         platformModule,
         dataModule,
-        domainModule
+        domainModule,
+        presentationModule
     )
 }
 

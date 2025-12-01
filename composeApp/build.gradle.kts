@@ -35,6 +35,7 @@ kotlin {
     sourceSets {
         all {
             languageSettings.optIn("kotlin.time.ExperimentalTime")
+            languageSettings.optIn("androidx.compose.material3.ExperimentalMaterial3Api")
         }
         androidMain.dependencies {
             implementation(compose.preview)
@@ -48,6 +49,7 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
@@ -62,6 +64,12 @@ kotlin {
             implementation(libs.coroutines.extensions)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
+            // Voyager для навигации
+            implementation(libs.voyager.navigator)
+            implementation(libs.voyager.tab.navigator)
+            implementation(libs.voyager.transitions)
+            implementation(libs.voyager.koin)
+            implementation(libs.voyager.screenmodel)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

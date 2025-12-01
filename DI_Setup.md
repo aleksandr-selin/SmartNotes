@@ -18,19 +18,44 @@
 Модуль для Domain слоя, содержит все Use Cases:
 - **Notes:** AddNote, GetAllNotes, GetNoteById, UpdateNote, DeleteNote, SearchNotes
 - **Tasks:** AddTask, GetAllTasks, GetTaskById, UpdateTask, CompleteTask, DeleteTask, GetTasksForToday
-- **Subtasks:** AddSubtask, UpdateSubtask, ToggleSubtask, DeleteSubtask
+- **Subtasks:** AddSubtask, ToggleSubtask, DeleteSubtask
 
 **Scope:** `factory` — Use Cases создаются заново при каждом вызове, так как не хранят состояние.
 
-### 3. **androidModule** (`AndroidModule.kt`)
+### 3. **presentationModule** (`PresentationModule.kt`)
+Модуль для Presentation слоя, содержит ScreenModels:
+- `NotesListViewModel` - управление списком заметок
+- `NoteDetailViewModel` - создание/редактирование заметки (с параметром `noteId`)
+- `TasksListViewModel` - управление списком задач с фильтрами
+- `TaskDetailViewModel` - создание/редактирование задачи (с параметром `taskId`)
+
+**Scope:** `factory` — ViewModels создаются для каждого экрана и управляются Voyager.
+
+### 4. **androidModule** (`AndroidModule.kt`)
 Android-специфичный модуль, содержит:
 - `DatabaseDriverFactory(context)` — драйвер SQLDelight для Android
 
-### 4. **iosModule** (`IosModule.kt`)
+### 5. **iosModule** (`IosModule.kt`)
 iOS-специфичный модуль, содержит:
 - `DatabaseDriverFactory()` — драйвер SQLDelight для iOS
 
 ## Инициализация Koin
+
+### Общая схема
+
+```kotlin
+// KoinInitializer.kt (commonMain)
+fun initializeKoin(platformModule: Module) {
+    startKoin {
+        modules(
+            dataModule,
+            domainModule,
+            presentationModule,
+            platformModule  // Android или iOS специфичный
+        )
+    }
+}
+```
 
 ### Android
 
@@ -40,7 +65,6 @@ iOS-специфичный модуль, содержит:
 class SmartNotesApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        // Инициализация Koin для Android с Context
         PlatformKoinInitializer.initialize(this)
     }
 }
@@ -55,61 +79,65 @@ class SmartNotesApplication : Application() {
 
 ### iOS
 
-Инициализация происходит **автоматически** при первом обращении к Koin через механизм `expect`/`actual`:
+Инициализация происходит **автоматически** при первом обращении к Koin:
 
 ```kotlin
 // PlatformKoinInitializer.ios.kt
 actual object PlatformKoinInitializer {
     init {
-        // Автоматическая инициализация
         doInitialize()
     }
 }
 ```
 
-**Swift код не требует изменений:**
-```swift
-@main
-struct iOSApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
-}
-```
-
-Koin инициализируется автоматически при первом использовании DI в iOS приложении.
+Swift код не требует изменений - Koin инициализируется автоматически при первом использовании DI.
 
 ## Использование Koin
 
-### В Compose UI (для будущих ViewModel)
+### В ScreenModels с Voyager
+
+```kotlin
+import cafe.adriel.voyager.koin.getScreenModel
+import org.koin.core.parameter.parametersOf
+
+// Без параметров
+@Composable
+fun Content() {
+    val viewModel = getScreenModel<NotesListViewModel>()
+    // ...
+}
+
+// С параметрами
+@Composable
+fun Content() {
+    val viewModel = getScreenModel<NoteDetailViewModel> {
+        parametersOf(noteId)
+    }
+    // ...
+}
+```
+
+### В обычном Compose (без Voyager)
 
 ```kotlin
 import org.koin.compose.koinInject
 
 @Composable
-fun NotesScreen() {
-    val viewModel: NotesViewModel = koinInject()
+fun MyScreen() {
+    val repository: NotesRepository = koinInject()
     // ...
-}
-```
-
-### В ViewModel (будет реализовано позже)
-
-```kotlin
-class NotesViewModel(
-    private val getAllNotesUseCase: GetAllNotesUseCase,
-    private val addNoteUseCase: AddNoteUseCase
-) : ViewModel() {
-    // ViewModel code
 }
 ```
 
 ### Ручная инъекция (если нужно)
 
 ```kotlin
-val repository: NotesRepository = KoinPlatform.getKoin().get()
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+
+class MyClass : KoinComponent {
+    private val repository: NotesRepository by inject()
+}
 ```
 
 ## Зависимости в Gradle
@@ -187,10 +215,11 @@ iosMain.dependencies {
 
 ## Следующие шаги
 
-После настройки DI:
-1. ✅ Data Layer покрыт DI
-2. ✅ Domain Layer покрыт DI
-3. ⏳ Создать ViewModels
-4. ⏳ Создать Presentation Module для ViewModels
-5. ⏳ Реализовать UI с использованием `koinInject()`
+Текущий статус DI:
+1. ✅ Data Layer полностью покрыт DI
+2. ✅ Domain Layer полностью покрыт DI (все Use Cases)
+3. ✅ Presentation Layer полностью покрыт DI (все ScreenModels)
+4. ✅ Platform-specific модули для Android и iOS
+5. ✅ Voyager интеграция для навигации
 
+DI настройка завершена и готова к использованию! 🎉

@@ -1,397 +1,409 @@
-# Presentation Layer - Реализация
+# Presentation Layer - Руководство
 
 ## 🎯 Обзор
 
-Presentation слой реализован с использованием **Voyager**
-для навигации и **Koin** для Dependency Injection.
-Следует архитектуре **MVVM** с использованием **ScreenModel** от Voyager.
+Presentation слой следует архитектуре **MVVM** с использованием:
+- **Voyager** для навигации
+- **ScreenModel** для ViewModels
+- **Koin** для Dependency Injection
+- **Compose Multiplatform** для UI
 
-## 🧭 Навигация с Voyager
+## 🏗️ Архитектура
 
-### Архитектура навигации
+### Общая структура
 
 ```
-App
+presentation/
+├── navigation/
+│   ├── RootScreen.kt          # Корневой экран с TabNavigator
+│   └── tabs/
+│       ├── NotesTab.kt        # Таб заметок
+│       └── TasksTab.kt        # Таб задач
 │
-└── RootScreen (TabNavigator)
+└── screens/
+    ├── notes/
+    │   ├── NotesListScreen.kt
+    │   ├── NotesListViewModel.kt
+    │   ├── NoteDetailScreen.kt
+    │   └── NoteDetailViewModel.kt
     │
-    ├── NotesTab
-    │   └── Navigator (StackNavigator)
-    │       ├── NotesListScreen
-    │       └── NoteDetailScreen (noteId: Long?)
-    │
-    └── TasksTab
-        └── Navigator (StackNavigator)
-            ├── TasksListScreen
-            │   - Фильтры: All, Today, Active, Completed
-            └── TaskDetailScreen (taskId: Long?)
-                - С управлением подзадачами
+    └── tasks/
+        ├── TasksListScreen.kt
+        ├── TasksListViewModel.kt
+        ├── TaskDetailScreen.kt
+        └── TaskDetailViewModel.kt
 ```
 
-### Особенности навигации
+### Навигация
 
-1. **TabNavigator** - переключение между Notes и Tasks через нижнее меню
-2. **StackNavigator** - навигация в пределах каждого таба (список → детали)
-3. **Параметры** - передача ID через `data class` Screen
-4. **Deep navigation** - независимый стек для каждого таба
+```
+App → RootScreen (TabNavigator)
+├── NotesTab → Navigator (StackNavigator)
+│   ├── NotesListScreen
+│   └── NoteDetailScreen(noteId?)
+│
+└── TasksTab → Navigator (StackNavigator)
+    ├── TasksListScreen
+    └── TaskDetailScreen(taskId?)
+```
 
----
+## 📱 Создание нового экрана
 
-## 📱 ViewModels (ScreenModels)
-
-### NotesListViewModel
-
-**Состояния:**
+### 1. Создайте ViewModel (ScreenModel)
 
 ```kotlin
-sealed class NotesListUiState {
-    data object Loading
-    data object Empty
-    data class Success(val notes: List<Note>)
-    data class Error(val message: String)
+class MyScreenViewModel(
+    private val myUseCase: MyUseCase
+) : ScreenModel {
+    
+    // UI State
+    private val _uiState = MutableStateFlow<MyUiState>(MyUiState.Loading)
+    val uiState: StateFlow<MyUiState> = _uiState.asStateFlow()
+    
+    // Прочие состояния
+    private val _data = MutableStateFlow("")
+    val data: StateFlow<String> = _data.asStateFlow()
+    
+    init {
+        loadData()
+    }
+    
+    fun loadData() {
+        screenModelScope.launch {
+            _uiState.value = MyUiState.Loading
+            myUseCase().fold(
+                onSuccess = { result ->
+                    _uiState.value = MyUiState.Success(result)
+                },
+                onFailure = { error ->
+                    _uiState.value = MyUiState.Error(error.message ?: "Unknown error")
+                }
+            )
+        }
+    }
+    
+    fun updateData(newData: String) {
+        _data.value = newData
+    }
+}
+
+// UI State
+sealed class MyUiState {
+    data object Loading : MyUiState()
+    data object Empty : MyUiState()
+    data class Success(val data: MyData) : MyUiState()
+    data class Error(val message: String) : MyUiState()
 }
 ```
 
-**Основные функции:**
-
-- `loadNotes(sortByCreatedAt: Boolean)` - загрузка заметок
-- `searchNotes(query: String)` - поиск по заголовку и содержимому
-- `deleteNote(noteId: Long)` - удаление заметки
-- `clearSearch()` - очистка поиска
-
-**Scope:** `factory` (создаётся для каждого экрана)
-
----
-
-### NoteDetailViewModel
-
-**Состояния:**
+### 2. Зарегистрируйте в Koin
 
 ```kotlin
-sealed class NoteDetailUiState {
-    data object Loading
-    data object Success
-    data class Error(val message: String)
-}
-```
-
-**Основные функции:**
-
-- `updateTitle(newTitle: String)` - обновление заголовка
-- `updateContent(newContent: String)` - обновление содержимого
-- `saveNote(onSuccess: () -> Unit)` - сохранение (create/update)
-- `canSave(): Boolean` - валидация перед сохранением
-
-**Параметры:** `noteId: Long?` (null для создания)
-
----
-
-### TasksListViewModel
-
-**Состояния:**
-
-```kotlin
-sealed class TasksListUiState {
-    data object Loading
-    data class Empty(val filter: TasksFilter)
-    data class Success(val tasks: List<Task>, val filter: TasksFilter)
-    data class Error(val message: String)
-}
-
-enum class TasksFilter {
-    ALL, TODAY, ACTIVE, COMPLETED
-}
-```
-
-**Основные функции:**
-
-- `loadTasks(filter: TasksFilter)` - загрузка с фильтром
-- `toggleTaskCompletion(taskId: Long, isCompleted: Boolean)` - переключение статуса
-- `deleteTask(taskId: Long)` - удаление задачи
-- `completeAndDeleteTask(taskId: Long)` - завершение с удалением
-
-**Особенности:**
-
-- Фильтры: All, Today, Active, Completed
-- Автоматическое обновление через Flow
-
----
-
-### TaskDetailViewModel
-
-**Состояния:**
-
-```kotlin
-sealed class TaskDetailUiState {
-    data object Loading
-    data object Success
-    data class Error(val message: String)
-}
-```
-
-**Основные функции:**
-
-- `updateTitle/Description/Importance()` - обновление полей
-- `toggleIsToday()` - переключение флага "Сегодня"
-- `addSubtask(title: String)` - добавление подзадачи
-- `toggleSubtask(subtaskId: Long)` - переключение статуса подзадачи
-- `deleteSubtask(subtaskId: Long)` - удаление подзадачи
-- `saveTask(onSuccess: () -> Unit)` - сохранение задачи
-
-**Параметры:** `taskId: Long?` (null для создания)
-
-**Особенности:**
-
-- Управление подзадачами
-- Три уровня важности (Low, Medium, High)
-- Флаг "Сделать сегодня"
-
----
-
-## 🎨 UI Компоненты
-
-### NotesListScreen
-
-**Функциональность:**
-
-- Отображение списка заметок
-- FloatingActionButton для создания
-- Клик на заметку → NoteDetailScreen
-
-**UI элементы:**
-
-- TopAppBar с заголовком
-- LazyColumn со списком заметок
-- NoteCard - карточка заметки
-- Состояния: Loading, Empty, Success, Error
-
----
-
-### NoteDetailScreen
-
-**Функциональность:**
-
-- Создание новой заметки (noteId = null)
-- Редактирование существующей (noteId != null)
-- Валидация: title и content не пустые
-
-**UI элементы:**
-
-- TopAppBar с кнопками "Назад" и "Сохранить"
-- OutlinedTextField для заголовка
-- OutlinedTextField для содержимого (multiline)
-- LinearProgressIndicator при сохранении
-
----
-
-### TasksListScreen
-
-**Функциональность:**
-
-- Отображение списка задач с фильтрами
-- FilterChips для переключения фильтров
-- Checkbox для быстрого завершения
-- FloatingActionButton для создания
-
-**UI элементы:**
-
-- TopAppBar
-- Row с FilterChips (All, Today, Active, Completed)
-- LazyColumn со списком задач
-- TaskCard - карточка задачи с:
-    - Checkbox для завершения
-    - Заголовок и описание
-    - Прогресс подзадач
-    - Badge важности (для Medium/High)
-
----
-
-### TaskDetailScreen
-
-**Функциональность:**
-
-- Создание/редактирование задачи
-- Управление подзадачами
-- Выбор важности (Low, Medium, High)
-- Переключение флага "Сегодня"
-
-**UI элементы:**
-
-- TopAppBar с кнопками
-- OutlinedTextField для заголовка и описания
-- FilterChips для важности
-- Switch для флага "Сегодня"
-- Список подзадач с возможностью:
-    - Добавления (через диалог)
-    - Переключения статуса (Checkbox)
-    - Удаления (IconButton)
-
----
-
-## 🔌 Koin Integration
-
-### PresentationModule
-
-```kotlin
+// di/PresentationModule.kt
 val presentationModule = module {
-    // Notes
-    factoryOf(::NotesListViewModel)
+    // Без параметров
+    factoryOf(::MyScreenViewModel)
+    
+    // С параметрами
     factory { params ->
-        NoteDetailViewModel(
-            noteId = params.getOrNull(),
-            getNoteByIdUseCase = get(),
-            addNoteUseCase = get(),
-            updateNoteUseCase = get()
-        )
-    }
-
-    // Tasks
-    factoryOf(::TasksListViewModel)
-    factory { params ->
-        TaskDetailViewModel(
-            taskId = params.getOrNull(),
-            // ... use cases
+        MyScreenViewModel(
+            id = params.getOrNull(),
+            myUseCase = get()
         )
     }
 }
 ```
 
-### Использование в Screens
+### 3. Создайте Screen
 
 ```kotlin
-// Без параметров
-val viewModel = getScreenModel<NotesListViewModel>()
-
-// С параметрами
-val viewModel = getScreenModel<NoteDetailViewModel> {
-    parametersOf(noteId)
+data class MyScreen(val id: Long?) : Screen {
+    
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        val viewModel = getScreenModel<MyScreenViewModel> {
+            parametersOf(id)
+        }
+        val uiState by viewModel.uiState.collectAsState()
+        val data by viewModel.data.collectAsState()
+        
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("My Screen") },
+                    navigationIcon = {
+                        IconButton(onClick = { navigator.pop() }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            when (val state = uiState) {
+                is MyUiState.Loading -> LoadingContent(paddingValues)
+                is MyUiState.Empty -> EmptyContent(paddingValues)
+                is MyUiState.Success -> SuccessContent(state.data, paddingValues)
+                is MyUiState.Error -> ErrorContent(state.message, paddingValues)
+            }
+        }
+    }
 }
 ```
 
----
+## 🎨 Лучшие практики
 
-## 🔄 Жизненный цикл
+### UI State Pattern
 
-### ScreenModel Lifecycle
-
-1. **Создание** - при первом отображении Screen
-2. **Активность** - пока Screen в стеке навигации
-3. **Уничтожение** - когда Screen удаляется из стека
-
-### Flow Subscription
-
-- `screenModelScope.launch` - автоматически отменяется при уничтожении
-- `collectAsState()` - автоматическая подписка/отписка
-
----
-
-## 📊 Состояния UI
-
-### Общая стратегия
-
-Все ViewModels используют паттерн **UI State**:
+Всегда используйте sealed class для UI состояний:
 
 ```kotlin
 sealed class UiState {
-    data object Loading      // Загрузка данных
-    data object Empty        // Нет данных
-    data class Success(...)  // Успех с данными
-    data class Error(...)    // Ошибка с сообщением
+    data object Loading : UiState()
+    data object Empty : UiState()
+    data class Success(val data: T) : UiState()
+    data class Error(val message: String) : UiState()
 }
 ```
 
-### Преимущества:
-
+**Почему:**
 - ✅ Типобезопасность
-- ✅ Exhaustive when
+- ✅ Exhaustive when expressions
 - ✅ Явное управление состояниями
 - ✅ Легко тестировать
 
----
+### Навигация
 
-## 🎯 Ключевые решения
+**Передача параметров:**
 
-### 1. Voyager вместо Jetpack Navigation
+```kotlin
+// Определение Screen с параметром
+data class DetailScreen(val itemId: Long) : Screen {
+    @Composable
+    override fun Content() {
+        val viewModel = getScreenModel<DetailViewModel> {
+            parametersOf(itemId)
+        }
+    }
+}
+
+// Навигация
+navigator.push(DetailScreen(itemId = 123))
+```
+
+**Возврат назад:**
+
+```kotlin
+// Простой возврат
+navigator.pop()
+
+// Возврат с результатом (через ViewModel/StateHolder)
+viewModel.saveData {
+    navigator.pop()
+}
+```
+
+### StateFlow vs State
+
+**Используйте StateFlow в ViewModel:**
+
+```kotlin
+private val _data = MutableStateFlow("")
+val data: StateFlow<String> = _data.asStateFlow()
+```
+
+**Собирайте в Composable:**
+
+```kotlin
+val data by viewModel.data.collectAsState()
+```
 
 **Почему:**
+- ✅ Реактивность
+- ✅ Автоматическая отписка при уничтожении Composable
+- ✅ Thread-safe обновления
 
-- ✅ KMP-native
-- ✅ Простой API
-- ✅ Интеграция с Koin
-- ✅ Tab Navigation из коробки
+### Валидация форм
 
-### 2. ScreenModel вместо ViewModel
+Создавайте отдельный StateFlow для состояния кнопок:
 
-**Почему:**
+```kotlin
+private val _canSave = MutableStateFlow(false)
+val canSave: StateFlow<Boolean> = _canSave.asStateFlow()
 
-- ✅ Работает на всех платформах (KMP)
-- ✅ Интеграция с Voyager
-- ✅ Похож на Jetpack ViewModel
+fun updateTitle(newTitle: String) {
+    _title.value = newTitle
+    updateValidation()
+}
 
-### 3. Factory scope для ViewModels
+private fun updateValidation() {
+    _canSave.value = _title.value.isNotBlank() && _content.value.isNotBlank()
+}
+```
 
-**Почему:**
+В UI:
 
-- ✅ Каждый Screen получает новый экземпляр
-- ✅ Lifecycle управляется Voyager
-- ✅ Не нужно manually dispose
+```kotlin
+val canSave by viewModel.canSave.collectAsState()
 
-### 4. Параметры через data class Screen
+Button(
+    onClick = { viewModel.save() },
+    enabled = canSave
+) {
+    Text("Save")
+}
+```
 
-**Почему:**
+### Обработка ошибок
 
-- ✅ Типобезопасность
-- ✅ Сериализация для state restoration
-- ✅ Чёткий контракт Screen
+**В ViewModel:**
 
----
+```kotlin
+myUseCase().fold(
+    onSuccess = { result ->
+        _uiState.value = UiState.Success(result)
+    },
+    onFailure = { error ->
+        _uiState.value = UiState.Error(error.message ?: "Unknown error")
+    }
+)
+```
 
-## 🚀 Следующие шаги
+**В UI:**
 
-### Расширения UI:
+```kotlin
+is UiState.Error -> {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = state.message,
+            color = MaterialTheme.colorScheme.error
+        )
+        Button(onClick = { viewModel.retry() }) {
+            Text("Retry")
+        }
+    }
+}
+```
 
-1. **Анимации переходов** - Voyager Transitions
-2. **Swipe actions** - для удаления в списках
-3. **Pull-to-refresh** - обновление списков
-4. **Search bar** - полноценный поиск в NotesListScreen
-5. **Empty states** - более красивые пустые состояния
-6. **Error handling** - Snackbar для ошибок
+## 🔄 Жизненный цикл
 
-### Оптимизации:
+### ScreenModel
 
-1. **Pagination** - для больших списков
-2. **Image caching** - если добавим изображения
-3. **Offline-first** - уже реализовано через SQLDelight
+- **Создание:** При первом отображении Screen
+- **Активность:** Пока Screen в стеке навигации
+- **Уничтожение:** Когда Screen удаляется из стека
 
-### Тестирование:
+### Coroutine Scopes
 
-1. **ViewModel tests** - Unit тесты с MockK
-2. **Screen tests** - UI тесты с Compose Testing
-3. **Navigation tests** - тесты навигации
+```kotlin
+// Используйте screenModelScope
+screenModelScope.launch {
+    // Автоматически отменяется при уничтожении ScreenModel
+}
+```
 
----
+### Flow Subscriptions
 
-## 📝 Итоги
+```kotlin
+// В ViewModel
+flow.collect { data ->
+    _uiState.value = UiState.Success(data)
+}
 
-**Реализовано:**
+// В Composable
+val data by viewModel.data.collectAsState()
+// Автоматическая подписка/отписка
+```
 
-- ✅ Полная навигация с Voyager (Tab + Stack)
-- ✅ 4 ScreenModels с управлением состоянием
-- ✅ 4 полнофункциональных Screen
-- ✅ Интеграция с Koin DI
-- ✅ UI состояния для всех экранов
-- ✅ CRUD операции для Notes и Tasks
+## 🧪 Тестирование
+
+### Unit тесты ViewModel
+
+```kotlin
+class MyViewModelTest {
+    private lateinit var viewModel: MyViewModel
+    private val mockUseCase: MyUseCase = mockk()
+    
+    @Before
+    fun setup() {
+        viewModel = MyViewModel(mockUseCase)
+    }
+    
+    @Test
+    fun `loadData should update uiState to Success`() = runTest {
+        // Given
+        val expectedData = MyData(...)
+        coEvery { mockUseCase() } returns Result.success(expectedData)
+        
+        // When
+        viewModel.loadData()
+        
+        // Then
+        val state = viewModel.uiState.value
+        assertTrue(state is MyUiState.Success)
+        assertEquals(expectedData, (state as MyUiState.Success).data)
+    }
+}
+```
+
+## 📊 Текущий статус
+
+**Реализованные экраны:**
+- ✅ NotesListScreen - список заметок
+- ✅ NoteDetailScreen - создание/редактирование заметки
+- ✅ TasksListScreen - список задач с фильтрами
+- ✅ TaskDetailScreen - создание/редактирование задачи
+
+**Основной функционал:**
+- ✅ Tab Navigation (Заметки / Задачи)
+- ✅ Stack Navigation внутри табов
+- ✅ CRUD операции для заметок и задач
 - ✅ Управление подзадачами
-- ✅ Фильтры для задач
+- ✅ Фильтры задач (All, Today, Active, Completed)
+- ✅ Диалоги подтверждения
 - ✅ Валидация форм
 
-**Архитектура:**
+## 🚀 Рекомендации для расширения
 
-- 🏗️ Clean Architecture
-- 📐 MVVM pattern
-- 🔄 Unidirectional Data Flow
-- 🎯 Single Source of Truth
-- ⚡ Reactive UI с Flow
+### Новые экраны
 
-Presentation слой полностью готов к использованию! 🎉
+1. Следуйте паттерну: ViewModel + Screen + UiState
+2. Регистрируйте в PresentationModule
+3. Используйте Voyager для навигации
+4. Собирайте StateFlow через collectAsState()
 
+### Сложная навигация
+
+Для вложенной навигации используйте:
+
+```kotlin
+TabNavigator(tab = HomeTab) {
+    CurrentTab()
+}
+
+// Или Stack в Stack
+Navigator(screen = ListScreen) {
+    CurrentScreen()
+}
+```
+
+### Shared State
+
+Если нужен shared state между экранами:
+
+```kotlin
+// SharedViewModel как singleton
+single { SharedViewModel() }
+
+// Или через Voyager ScreenModel с SharedScope
+```
+
+## 📚 Полезные ресурсы
+
+- [Voyager Documentation](https://voyager.adriel.cafe/)
+- [Koin Documentation](https://insert-koin.io/)
+- [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
+
+---
+
+Следуя этим принципам, вы можете легко расширять Presentation слой новыми экранами и функциями! 🎉

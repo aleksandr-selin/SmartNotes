@@ -1,35 +1,197 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+# SmartNotes
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+> Кроссплатформенное приложение для заметок и задач на Kotlin Multiplatform
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## 📝 О проекте
 
-### Build and Run Android Application
+**SmartNotes** - это современное приложение для управления заметками и задачами, разработанное с использованием Kotlin Multiplatform. Приложение позволяет создавать заметки, управлять задачами с подзадачами, фильтровать и организовывать информацию.
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+### Ключевые возможности
 
-### Build and Run iOS Application
+- ✅ **Заметки** - создание, редактирование, удаление заметок
+- ✅ **Задачи** - управление задачами с поддержкой подзадач
+- ✅ **Фильтры** - просмотр задач по категориям (Все, Сегодня, Активные, Завершённые)
+- ✅ **Подзадачи** - разбиение задач на более мелкие шаги
+- ✅ **Offline-first** - работа без интернета с локальной базой данных
+- ✅ **Важность задач** - три уровня приоритета (Низкая, Средняя, Высокая)
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+## 🏗️ Архитектура
+
+Проект следует принципам **Clean Architecture** с разделением на три слоя:
+
+```
+┌─────────────────────────────────────┐
+│      Presentation Layer             │  ← Voyager + Compose Multiplatform
+│  (UI, Navigation, ViewModels)       │
+├─────────────────────────────────────┤
+│      Domain Layer                   │  ← Use Cases + Models
+│  (Business Logic)                   │
+├─────────────────────────────────────┤
+│      Data Layer                     │  ← SQLDelight + Repositories
+│  (Database, Repositories)           │
+└─────────────────────────────────────┘
+```
+
+### Основные принципы
+
+- **MVVM** - паттерн для Presentation слоя
+- **Unidirectional Data Flow** - однонаправленный поток данных
+- **Dependency Injection** - Koin для управления зависимостями
+- **Single Source of Truth** - база данных как единый источник данных
+- **Reactive UI** - StateFlow для реактивного обновления UI
+
+## 🛠️ Технологический стек
+
+### Core
+
+- **Kotlin Multiplatform** - общий код для Android и iOS
+- **Compose Multiplatform** - декларативный UI фреймворк
+- **Coroutines & Flow** - асинхронность и реактивность
+
+### Navigation & DI
+
+- **Voyager** - навигация в Compose Multiplatform
+- **Koin** - Dependency Injection
+
+### Data
+
+- **SQLDelight** - типобезопасная работа с SQLite
+- **Kotlin Serialization** - сериализация данных
+
+### Architecture
+
+- **Clean Architecture** - разделение на слои
+- **MVVM** - паттерн для UI
+- **Use Cases** - инкапсуляция бизнес-логики
+- **Repository Pattern** - абстракция доступа к данным
+
+## 📱 Платформы
+
+- 🚧 **Android** - в разработке
+- 🚧 **iOS** - в разработке
+
+## 🚀 Текущий статус
+
+### ✅ Реализовано
+
+**Data Layer:**
+- SQLDelight база данных (Notes, Tasks, Subtasks)
+- Repository Pattern для всех сущностей
+- Типобезопасные запросы
+- Каскадное удаление
+
+**Domain Layer:**
+- Use Cases для всех операций (16 Use Cases)
+- Модели предметной области
+- Бизнес-логика (фильтры, валидация)
+
+**Presentation Layer:**
+- 4 полноценных экрана с навигацией
+- Tab Navigation (Заметки / Задачи)
+- CRUD операции для заметок и задач
+- Управление подзадачами
+- Фильтры задач
+- Диалоги подтверждения
+- Валидация форм
+- Автоматическое завершение задач при выполнении всех подзадач
+
+**Dependency Injection:**
+- Полная настройка Koin
+- 4 модуля (Data, Domain, Presentation, Platform)
+- Platform-specific драйверы для Android/iOS
+
+### 🚧 В разработке
+
+- Поиск по заметкам
+- Сортировка заметок и задач
+- Темная тема
+- Синхронизация данных
+
+### 📋 Планируется
+
+- Категории и теги
+- Напоминания для задач
+- Прикрепление изображений
+- Резервное копирование
+- Экспорт/импорт данных
+- Виджеты
+
+## 🏃 Запуск проекта
+
+### Требования
+
+- JDK 17 или выше
+- Android Studio Ladybug | 2024.2.1 или новее
+- Kotlin 2.0+
+- Xcode 15+ (для iOS)
+
+### Android
+
+```bash
+./gradlew :composeApp:assembleDebug
+```
+
+Или используйте Run Configuration в Android Studio.
+
+### iOS
+
+1. Откройте `/iosApp` в Xcode
+2. Выберите симулятор или устройство
+3. Нажмите Run
+
+## 📂 Структура проекта
+
+```
+SmartNotes/
+├── composeApp/
+│   └── src/
+│       ├── commonMain/         # Общий код
+│       │   ├── kotlin/
+│       │   │   ├── data/       # Repositories, Database
+│       │   │   ├── domain/     # Use Cases, Models
+│       │   │   ├── presentation/  # UI, Navigation, ViewModels
+│       │   │   └── di/         # Koin modules
+│       │   ├── composeResources/  # Строки, изображения
+│       │   └── sqldelight/     # SQL схемы
+│       │
+│       ├── androidMain/        # Android-специфичный код
+│       │   ├── kotlin/
+│       │   └── res/
+│       │
+│       └── iosMain/            # iOS-специфичный код
+│           └── kotlin/
+│
+├── iosApp/                     # iOS приложение
+│   └── iosApp/
+│
+├── gradle/
+├── DI_Setup.md                 # Документация по DI
+├── PresentationLayer.md        # Руководство по Presentation
+└── README.md                   # Этот файл
+```
+
+## 📚 Документация
+
+- [DI_Setup.md](./DI_Setup.md) - настройка Dependency Injection с Koin
+- [PresentationLayer.md](./PresentationLayer.md) - руководство по созданию новых экранов
+- [STRING_RESOURCES.md](./STRING_RESOURCES.md) - работа со строковыми ресурсами
+
+## 🤝 Вклад в проект
+
+Проект находится в **активной разработке**. 
+
+## 📄 Лицензия
+
+Этот проект создан в учебных целях.
+
+## 🔗 Полезные ссылки
+
+- [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html)
+- [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
+- [SQLDelight](https://cashapp.github.io/sqldelight/)
+- [Voyager](https://voyager.adriel.cafe/)
+- [Koin](https://insert-koin.io/)
 
 ---
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+⭐ **Статус:** В активной разработке | 🎯 **Цель:** Полнофункциональное KMP приложение

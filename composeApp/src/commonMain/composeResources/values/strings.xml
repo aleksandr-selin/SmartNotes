@@ -27,6 +27,8 @@
     <string name="note_content_hint">Содержание</string>
     <string name="note_new">Новая заметка</string>
     <string name="note_edit">Редактирование</string>
+    <string name="note_delete_confirm">Удалить заметку?</string>
+    <string name="note_delete_confirm_message">Это действие нельзя отменить</string>
     
     <!-- Tasks -->
     <string name="tasks_title">Задачи</string>
@@ -40,6 +42,12 @@
     <string name="task_new">Новая задача</string>
     <string name="task_edit">Редактирование</string>
     <string name="task_do_today">Сделать сегодня</string>
+    <string name="task_completed">Задача выполнена</string>
+    <string name="task_delete_confirm">Удалить задачу?</string>
+    <string name="task_delete_confirm_message">Задача и все подзадачи будут удалены навсегда</string>
+    <string name="task_complete_dialog_title">Задача выполнена!</string>
+    <string name="task_complete_dialog_message">Хотите удалить задачу или оставить в списке?</string>
+    <string name="task_keep">Оставить</string>
     
     <!-- Filters -->
     <string name="filter_all">Все</string>
@@ -59,4 +67,5 @@
     <string name="subtask_new">Новая подзадача</string>
     <string name="subtask_name_hint">Название</string>
     <string name="subtasks_count_format">%d/%d подзадач</string>
+    <string name="subtasks_more">Ещё %d</string>
 </resources>

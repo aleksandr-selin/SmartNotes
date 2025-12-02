@@ -26,6 +26,10 @@ insertSubtask:
 INSERT INTO subtask(taskId, title, isDone)
 VALUES (?, ?, ?);
 
+-- Получить ID последней вставленной подзадачи
+getLastInsertedSubtaskId:
+SELECT last_insert_rowid();
+
 -- Обновление подзадачи
 updateSubtask:
 UPDATE subtask
@@ -65,8 +69,4 @@ WHERE taskId = ? AND isDone = 0;
 -- Удаление всех подзадач для конкретной задачи (обычно не нужно из-за CASCADE)
 deleteSubtasksByTaskId:
 DELETE FROM subtask WHERE taskId = ?;
-
--- Получение последней вставленной подзадачи
-getLastInsertedSubtask:
-SELECT * FROM subtask WHERE id = last_insert_rowid();
 

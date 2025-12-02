@@ -42,7 +42,6 @@ import smartnotes.composeapp.generated.resources.Res
 import smartnotes.composeapp.generated.resources.back
 import smartnotes.composeapp.generated.resources.cancel
 import smartnotes.composeapp.generated.resources.delete
-import smartnotes.composeapp.generated.resources.error_format
 import smartnotes.composeapp.generated.resources.note_content_hint
 import smartnotes.composeapp.generated.resources.note_delete_confirm
 import smartnotes.composeapp.generated.resources.note_delete_confirm_message
@@ -179,7 +178,7 @@ data class NoteDetailScreen(val noteId: Long?) : Screen {
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = stringResource(Res.string.error_format, state.message),
+                                text = "Ошибка: ${state.message}",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.error
                             )

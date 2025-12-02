@@ -26,6 +26,10 @@ insertNote:
 INSERT INTO note(title, content, createdAt, updatedAt)
 VALUES (?, ?, ?, ?);
 
+-- Получить ID последней вставленной заметки
+getLastInsertedNoteId:
+SELECT last_insert_rowid();
+
 -- Обновление заметки
 updateNote:
 UPDATE note
@@ -53,8 +57,4 @@ searchNotes:
 SELECT * FROM note
 WHERE title LIKE '%' || ? || '%' OR content LIKE '%' || ? || '%'
 ORDER BY updatedAt DESC;
-
--- Получение последней вставленной заметки (для возврата ID)
-getLastInsertedNote:
-SELECT * FROM note WHERE id = last_insert_rowid();
 

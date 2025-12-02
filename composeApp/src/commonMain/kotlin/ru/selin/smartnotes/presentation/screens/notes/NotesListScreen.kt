@@ -36,7 +36,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import org.jetbrains.compose.resources.stringResource
 import ru.selin.smartnotes.domain.model.Note
 import smartnotes.composeapp.generated.resources.Res
-import smartnotes.composeapp.generated.resources.error_format
 import smartnotes.composeapp.generated.resources.note_add
 import smartnotes.composeapp.generated.resources.notes_empty
 import smartnotes.composeapp.generated.resources.notes_title
@@ -133,7 +132,7 @@ class NotesListScreen : Screen {
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = stringResource(Res.string.error_format, state.message),
+                                text = "Ошибка: ${state.message}",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.error
                             )

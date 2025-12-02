@@ -10,7 +10,6 @@
     <string name="cancel">Отмена</string>
     <string name="retry">Повторить</string>
     <string name="error">Ошибка</string>
-    <string name="error_format">Ошибка: %s</string>
     <string name="error_update">Ошибка обновления</string>
     <string name="error_delete">Ошибка удаления</string>
     <string name="error_complete">Ошибка завершения</string>

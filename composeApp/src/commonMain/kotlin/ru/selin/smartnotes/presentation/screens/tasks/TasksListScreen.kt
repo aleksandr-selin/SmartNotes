@@ -166,7 +166,7 @@ class TasksListScreen : Screen {
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    text = stringResource(Res.string.error_format, state.message),
+                                    text = "Ошибка: ${state.message}",
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.error
                                 )

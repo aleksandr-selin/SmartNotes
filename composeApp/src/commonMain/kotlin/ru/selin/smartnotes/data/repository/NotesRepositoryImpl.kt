@@ -54,17 +54,17 @@ class NotesRepositoryImpl(
 
     override suspend fun insertNote(note: Note): Long = withContext(Dispatchers.IO) {
         val params = note.toInsertParams()
+        
+        // Вставляем заметку
         queries.insertNote(
             title = params.title,
             content = params.content,
             createdAt = params.createdAt,
             updatedAt = params.updatedAt
         )
-
-        // Получаем ID вставленной заметки
-        queries.getLastInsertedNote()
-            .executeAsOne()
-            .id
+        
+        // Получаем ID последней вставленной записи
+        queries.getLastInsertedNoteId().executeAsOne()
     }
 
     override suspend fun updateNote(note: Note): Unit = withContext(Dispatchers.IO) {

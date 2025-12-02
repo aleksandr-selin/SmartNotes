@@ -75,29 +75,35 @@ class TasksRepositoryImpl(
 
     override suspend fun insertTask(task: Task): Long = withContext(Dispatchers.IO) {
         val params = task.toInsertParams()
-        taskQueries.insertTask(
-            title = params.title,
-            description = params.description,
-            importance = params.importance,
-            isToday = params.isToday,
-            isCompleted = params.isCompleted,
-            createdAt = params.createdAt,
-            updatedAt = params.updatedAt
-        )
-
-        val taskId = taskQueries.getLastInsertedTask().executeAsOne().id
-
-        // Вставляем подзадачи, если они есть
-        task.subtasks.forEach { subtask ->
-            val subtaskParams = subtask.copy(taskId = taskId).toInsertParams()
-            subtaskQueries.insertSubtask(
-                taskId = subtaskParams.taskId,
-                title = subtaskParams.title,
-                isDone = subtaskParams.isDone
+        
+        // Используем transaction для вставки задачи и подзадач
+        database.transactionWithResult {
+            // Вставляем задачу
+            taskQueries.insertTask(
+                title = params.title,
+                description = params.description,
+                importance = params.importance,
+                isToday = params.isToday,
+                isCompleted = params.isCompleted,
+                createdAt = params.createdAt,
+                updatedAt = params.updatedAt
             )
-        }
+            
+            // Получаем ID последней вставленной задачи
+            val taskId = taskQueries.getLastInsertedTaskId().executeAsOne()
 
-        taskId
+            // Вставляем подзадачи, если они есть
+            task.subtasks.forEach { subtask ->
+                val subtaskParams = subtask.copy(taskId = taskId).toInsertParams()
+                subtaskQueries.insertSubtask(
+                    taskId = subtaskParams.taskId,
+                    title = subtaskParams.title,
+                    isDone = subtaskParams.isDone
+                )
+            }
+
+            taskId
+        }
     }
 
     override suspend fun updateTask(task: Task): Unit = withContext(Dispatchers.IO) {
@@ -162,16 +168,23 @@ class TasksRepositoryImpl(
 
     override suspend fun insertSubtask(subtask: Subtask): Long = withContext(Dispatchers.IO) {
         val params = subtask.toInsertParams()
-        subtaskQueries.insertSubtask(
-            taskId = params.taskId,
-            title = params.title,
-            isDone = params.isDone
-        )
+        
+        // Используем transaction для гарантии получения правильного last_insert_rowid()
+        val subtaskId = database.transactionWithResult {
+            subtaskQueries.insertSubtask(
+                taskId = params.taskId,
+                title = params.title,
+                isDone = params.isDone
+            )
+            
+            // Получаем ID последней вставленной подзадачи
+            subtaskQueries.getLastInsertedSubtaskId().executeAsOne()
+        }
 
         // ВАЖНО: Обновляем updatedAt родительской задачи
         updateTaskTimestamp(subtask.taskId, Clock.System.now().epochSeconds)
 
-        subtaskQueries.getLastInsertedSubtask().executeAsOne().id
+        subtaskId
     }
 
     override suspend fun updateSubtask(subtask: Subtask): Unit = withContext(Dispatchers.IO) {

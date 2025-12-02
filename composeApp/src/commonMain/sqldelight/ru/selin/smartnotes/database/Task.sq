@@ -31,6 +31,10 @@ insertTask:
 INSERT INTO task(title, description, importance, isToday, isCompleted, createdAt, updatedAt)
 VALUES (?, ?, ?, ?, ?, ?, ?);
 
+-- Получить ID последней вставленной задачи
+getLastInsertedTaskId:
+SELECT last_insert_rowid();
+
 -- Обновление задачи
 updateTask:
 UPDATE task
@@ -74,8 +78,4 @@ searchTasks:
 SELECT * FROM task
 WHERE title LIKE '%' || ? || '%' OR description LIKE '%' || ? || '%'
 ORDER BY updatedAt DESC;
-
--- Получение последней вставленной задачи
-getLastInsertedTask:
-SELECT * FROM task WHERE id = last_insert_rowid();
 
